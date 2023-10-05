@@ -2,11 +2,11 @@ import requests
 from requests_oauthlib import OAuth1Session, OAuth1
 
 class Connection():
-    def __init__(self, API_KEY, API_SECRET):
+    def __init__(self, API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET):
         self.API_KEY = API_KEY
         self.API_SECRET = API_SECRET
-        self.ACCES_TOKEN = "wGWG6kNphfqM2wW8zpZf6H7f2PzSB9Lj"
-        self.ACCES_TOKEN_SECRET = "dtHhBGQK6MrQrPcL2SHHdbR73Sv7nm2bzJgFvsFj3dbrQPxvtqZsSJbgStn7jQtZ"
+        self.ACCES_TOKEN = ACCES_TOKEN
+        self.ACCES_TOKEN_SECRET = ACCES_TOKEN_SECRET
 
         # !only run when ACCES token and secret stop working!
         # self._get_acces() 
@@ -46,8 +46,8 @@ class Connection():
 
 class Loader(Connection):
     '''Loads pictures from smugmug, uses access token that Connection can fetch'''
-    def __init__(self, API_KEY, API_SECRET):
-        super().__init__(API_KEY, API_SECRET)
+    def __init__(self, API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET):
+        super().__init__(API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET)
         self.url = 'https://api.smugmug.com/api/v2/album'
 
     def download(self):
@@ -59,6 +59,8 @@ class Loader(Connection):
         )
 
         response = requests.get(self.url, auth=auth)
+        if response.status_code != "200":
+            self._get_acces
         print(response.status_code)
 
 
