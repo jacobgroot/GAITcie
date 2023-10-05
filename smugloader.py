@@ -1,54 +1,47 @@
-"""This is an example smugmug uses, but it does not work for me"""
+from requests_oauthlib import OAuth1Session
 
-#!/usr/bin/env python3
-from rauth import OAuth1Session
-import sys
+class Connection():
+    def __init__(self, API_KEY, API_SECRET):
+        self.API_KEY = API_KEY
+        self.API_SECRET = API_SECRET
+        self.ACCES_TOKEN = None
+        self.ACCES_TOKEN_SECRET = None
+        self._get_acces()
 
-from common import API_ORIGIN, get_service, add_auth_params
+    def _get_acces(self): 
+        """Gets the acces token & secret from smugmug"""
+        # Define SmugMug API endpoints
+        REQUEST_TOKEN_URL = 'https://api.smugmug.com/services/oauth/1.0a/getRequestToken'
+        AUTHORIZE_URL = 'https://api.smugmug.com/services/oauth/1.0a/authorize'
+        ACCESS_TOKEN_URL = 'https://api.smugmug.com/services/oauth/1.0a/getAccessToken'
+        OAUTH_CALLBACK = 'oob'  # Change this to your actual callback URL or 'oob'
 
+        # Create an OAuth1Session with your API credentials and the callback parameter
+        oauth = OAuth1Session(self.API_KEY, client_secret=self.API_SECRET, callback_uri=OAUTH_CALLBACK)
 
-def main():
-    """This example interacts with its user through the console, but it is
-    similar in principle to the way any non-web-based application can obtain an
-    OAuth authorization from a user."""
-    service = get_service()
+        # Step 1: Get a request token and token secret
+        fetch_response = oauth.fetch_request_token(REQUEST_TOKEN_URL)
 
-    # First, we need a request token and secret, which SmugMug will give us.
-    # We are specifying "oob" (out-of-band) as the callback because we don't
-    # have a website for SmugMug to call back to.
-    rt, rts = service.get_request_token(params={'oauth_callback': 'oob'})
+        # Extract the request token and secret
+        request_token = fetch_response.get('oauth_token')
+        request_token_secret = fetch_response.get('oauth_token_secret')
 
-    # Second, we need to give the user the web URL where they can authorize our
-    # application.
-    auth_url = add_auth_params(
-            service.get_authorize_url(rt), access='Full', permissions='Modify')
-    print('Go to %s in a web browser.' % auth_url)
+        # Redirect the user to the authorization URL
+        authorization_url = oauth.authorization_url(AUTHORIZE_URL)
+        print("Please go to the following URL and authorize the application:", authorization_url)
+        verifier = input("Enter the verifier: ")
 
-    # Once the user has authorized our application, they will be given a
-    # six-digit verifier code. Our third step is to ask the user to enter that
-    # code:
-    sys.stdout.write('Enter the six-digit code: ')
-    sys.stdout.flush()
-    verifier = sys.stdin.readline().strip()
+        #Get the access token and access token secret
+        oauth = OAuth1Session(self.API_KEY, client_secret=self.API_SECRET, resource_owner_key=request_token, resource_owner_secret=request_token_secret, verifier=verifier)
+        access_token_response = oauth.fetch_access_token(ACCESS_TOKEN_URL)
 
-    # Finally, we can use the verifier code, along with the request token and
-    # secret, to sign a request for an access token.
-    at, ats = service.get_access_token(rt, rts, params={'oauth_verifier': verifier})
-
-    # The access token we have received is valid forever, unless the user
-    # revokes it.  Let's make one example API request to show that the access
-    # token works.
-    print('Access token: %s' % at)
-    print('Access token secret: %s' % ats)
-    session = OAuth1Session(
-            service.consumer_key,
-            service.consumer_secret,
-            access_token=at,
-            access_token_secret=ats)
-    print(session.get(
-        API_ORIGIN + '/api/v2!authuser',
-        headers={'Accept': 'application/json'}).text)
+        # Extract the access token and secret
+        self.ACCES_TOKEN = access_token_response.get('oauth_token')
+        self.ACCES_TOKEN_SECRET = access_token_response.get('oauth_token_secret')
 
 
-if __name__ == '__main__':
-    main()
+class Loader(Connection):
+    '''Loads pictures from smugmug, uses acces token that Connection can fetch'''
+    def __init__(self, API_KEY, API_SECRET):
+        super().__init__(API_KEY, API_SECRET)
+        self._get_acces()
