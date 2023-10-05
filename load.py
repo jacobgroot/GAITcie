@@ -9,8 +9,8 @@ api_secret = 'XVXkQGKsFpJk9tHbMJHZdZgTBNbLrgCjW3f3XL4hQLFLbjHJq6QvLc64h82Zzp2d'
 # Set the API endpoint to list albums
 url = 'https://api.smugmug.com/api/v2/album'
 
-# Create an OAuth1Session
-oauth = OAuth1Session(api_key, client_secret=api_secret, signature_type='query')
+# Create an OAuth1Session 
+oauth = OAuth1Session(api_key, client_secret=api_secret, signature_type='query') # search documentation if we really need "query"
 
 # Make the authenticated GET request
 response = (oauth.get(

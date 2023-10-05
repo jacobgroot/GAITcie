@@ -1,4 +1,4 @@
-"""This is an example smugmug uses, but it also does not work for me"""
+"""This is an example smugmug uses, but it does not work for me"""
 
 #!/usr/bin/env python3
 from rauth import OAuth1Session
