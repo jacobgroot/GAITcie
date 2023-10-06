@@ -105,7 +105,7 @@ class Loader(Connection):
             print(f"Downloaded: {image_name}")
         else:
             print(f"Failed to download: {image_name}")
-# git upload check
+
 
 
 
