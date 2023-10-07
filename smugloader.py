@@ -50,6 +50,13 @@ class Loader(Connection):
     
     def __init__(self, API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET):
         super().__init__(API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET)
+        self.auth = auth = OAuth1(
+            self.API_KEY,
+            client_secret=self.API_SECRET,
+            resource_owner_key=self.ACCES_TOKEN,
+            resource_owner_secret=self.ACCES_TOKEN_SECRET
+        )
+        self.headers = {'Content-type': 'application/json', 'Accept': 'application/json', 'Methods': "GET"}
         self.__download_img = True
         self.__download_video = False
         self.alb_url = 'https://api.smugmug.com/api/v2/folder/user/rubenlugters!albumlist'
@@ -64,26 +71,31 @@ class Loader(Connection):
 
     def download(self):
         '''Performs downloading operation. Uses self.__download params to specify downloading type'''
-        auth = OAuth1(
-            self.API_KEY,
-            client_secret=self.API_SECRET,
-            resource_owner_key=self.ACCES_TOKEN,
-            resource_owner_secret=self.ACCES_TOKEN_SECRET
-        )
-        headers = {'Content-type': 'application/json', 'Accept': 'application/json', 'Methods': "GET"}
-        response_raw = requests.get(self.alb_url, auth=auth, headers=headers)
+        response_raw = requests.get(self.alb_url, auth=self.auth, headers=self.headers)
 
         if response_raw.status_code != "200":
             self._get_acces
 
         response = response_raw.json()
-
         for album in response["Response"]["AlbumList"]:
-            images_url = 'https://api.smugmug.com' + album["Uri"] + "!images"
-            imgs = requests.get(images_url, auth=auth, headers=headers).json()
-            for pic in imgs["Response"]["AlbumImage"]:
-                self.__download_media(pic["ArchivedUri"])
-            raise
+            self.__search_nested_album(album)
+            print(f"downloading album: {album['Name']}...")
+            
+    def __search_nested_album(self, album):
+
+        try:
+            print(album)
+            for _album in album["AlbumList"]:
+                print(_album)
+                self.__search_nested_album(_album)
+        except:
+            self.__retreive_img(album)
+        
+    def __retreive_img(self, album):            
+        images_url = 'https://api.smugmug.com' + album["Uri"] + "!images"
+        imgs = requests.get(images_url, auth=self.auth, headers=self.headers).json()     
+        for pic in imgs["Response"]["AlbumImage"]:
+            self.__download_media(pic["ArchivedUri"])           
 
     def __download_media(self, image_url):
         """ Downloads images and videos, on conditions of params __download
@@ -93,17 +105,19 @@ class Loader(Connection):
         image_path = os.path.join(self.download_directory, image_name)
 
         # perform download type check
-        if not self.__download_video and image_name[:3] != "IMG":
+        if self.__download_video and image_name[-3:] != "mp4":
             return
-        if not self.__download_img and image_name[:3] == "IMG":
+        if self.__download_img and image_name[-3:] != "jpg":
             return 
         
-        response = requests.get(image_url)
+        response = requests.get(image_url, auth=self.auth)
         if response.status_code == 200:
             with open(image_path, 'wb') as f:
                 f.write(response.content)
-            print(f"Downloaded: {image_name}")
+            # print(f"Downloaded: {image_name}")
         else:
+            # print(response.status_code)
+            # print)
             print(f"Failed to download: {image_name}")
 
 
