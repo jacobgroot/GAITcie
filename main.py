@@ -2,12 +2,12 @@
 from smugloader import Loader
 from api import API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET
 
+DOWNLOAD = False
 
 
-loaded_content = Loader(API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET)
-loaded_content.download()
-
-class Filter(): ...
+if DOWNLOAD:
+    loaded_content = Loader(API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET)
+    loaded_content.download()
 
 class Proces(): ...
 "AI dingen"
