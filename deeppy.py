@@ -43,8 +43,8 @@ class Analyse():
 
     def analyse(self):
         " Calls process_image on all images in media folder and stores it in pickle file"
-        image_files = [os.path.join(self.media_path, filename) for filename in os.listdir(self.media_path)]
 
+        image_files = [os.path.join(self.media_path, filename) for filename in os.listdir(self.media_path)]
         for img in tqdm(image_files):
             self.faces.append(self.process_image(img))
 
