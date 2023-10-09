@@ -4,7 +4,7 @@ from embeddings import Analyse
 from api import API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET
 
 DOWNLOAD = False
-DEEPFACE = True
+DEEPFACE = False
 PICKLE_FILE_NAME = "deepface_data.pickle"
 
 if DOWNLOAD:
