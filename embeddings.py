@@ -27,13 +27,14 @@ class Analyse():
     # CHANGE THIS WHEN YOU RUN ON DIFFERENT PC TO NOT BLOW IT UP
     NUMBER_OF_CORES = 2
 
-    def __init__(self, pickle_file):
+    def __init__(self, pickle_file, CREATE_TEST_SET):
         self.faces = []
         self.pickle_file = pickle_file
         self.media_path = os.path.join(os.getcwd(), 'media')
+        self.CREATE_TEST_SET = CREATE_TEST_SET
 
         # Remove the previous pickle file
-        if os.path.exists(pickle_file):
+        if os.path.exists(pickle_file) and not self.CREATE_TEST_SET:
             os.remove(pickle_file)
 
     @staticmethod
@@ -50,6 +51,10 @@ class Analyse():
         image_files = [os.path.join(self.media_path, filename) for filename in os.listdir(self.media_path)]
         for img in tqdm(image_files):
             self.faces.extend(self.process_image(img))
+            if self.CREATE_TEST_SET and len(self.faces) == 100:
+                with open("deepface_test_data.pickle", "wb") as file:
+                    pickle.dump(self.faces, file)
+                return
 
         # Save the results to a pickle file
         with open(self.pickle_file, "wb") as file:

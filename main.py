@@ -4,7 +4,8 @@ from embeddings import Analyse
 from api import API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET
 
 DOWNLOAD = False
-DEEPFACE = False
+DEEPFACE = True
+CREATE_TEST_SET = True
 PICKLE_FILE_NAME = "deepface_data.pickle"
 
 if DOWNLOAD:
@@ -12,7 +13,7 @@ if DOWNLOAD:
     loaded_content.download()
 
 if DEEPFACE:
-    analyser = Analyse(PICKLE_FILE_NAME)
+    analyser = Analyse(PICKLE_FILE_NAME, CREATE_TEST_SET)
     analyser.analyse()
 
 
