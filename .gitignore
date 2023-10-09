@@ -1,3 +1,4 @@
 api.py
 deepface_data.pickle
+deepface_test_data.pickle
 media/
