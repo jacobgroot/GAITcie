@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 class Faces:
     """Each instance represents one image containing information on each person in it."""
     embedding: list
+    umap_embedding: list
     image_path: str
     labels: list = field(default_factory=list)
 

@@ -7,9 +7,9 @@ from api import API_KEY, API_SECRET, ACCES_TOKEN, ACCES_TOKEN_SECRET
 DOWNLOAD = False
 DEEPFACE = False
 CREATE_TEST_SET = False
-KMEANS = False
-PREPROCESS = False
-DIMENSIONS = 100
+KMEANS = True
+PREPROCESS = True
+DIMENSIONS = 8
 PICKLE_FILE_NAME = "deepface_data.pickle"
 
 if DOWNLOAD:
@@ -24,6 +24,7 @@ if KMEANS:
     cluster = Kmeans_cluster()
     if PREPROCESS:
         cluster.preprocess(DIMENSIONS)
+    cluster.elbow()
 
 class Proces(): ...
 "AI dingen"
