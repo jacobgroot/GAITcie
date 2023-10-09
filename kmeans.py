@@ -8,10 +8,10 @@ import pickle
 class Kmeans_cluster():
         
     def __init__(self, range: tuple=(40, 65), pickle_file="deepface_data.pickle"):
-        self.pickle_file = "deepface_data.pickle" #change later
+        self.pickle_file = "deepface_test_data.pickle" #change later
         self.range = range
             
-        with open('deepface_data.pickle', 'rb') as pickle_file:
+        with open(self.pickle_file, 'rb') as pickle_file:
             self.faces = pickle.load(pickle_file)
 
     def preprocess(self):

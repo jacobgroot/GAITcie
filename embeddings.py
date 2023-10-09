@@ -37,13 +37,16 @@ class Analyse():
         if os.path.exists(pickle_file) and not self.CREATE_TEST_SET:
             os.remove(pickle_file)
 
+        if os.path.exists("deepface_test_data.pickle") and self.CREATE_TEST_SET:
+            os.remove("deepface_test_data.pickle")
+
     @staticmethod
     def process_image(img_path):
         " Returns Faces dataclass with all embeddings per image (n=number of persons in image)"
 
-        embeddings = [np.array(embedding) for x in DeepFace.represent(img_path, enforce_detection=False) for embedding in x["embedding"]]
+        embeddings = DeepFace.represent(img_path, enforce_detection=False)
 
-        return [Faces(embedding, img_path) for embedding in embeddings]
+        return [Faces(np.array(embedding["embedding"]), img_path) for embedding in embeddings]
 
     def analyse(self):
         " Calls process_image on all images in media folder and stores it in pickle file"
@@ -51,7 +54,7 @@ class Analyse():
         image_files = [os.path.join(self.media_path, filename) for filename in os.listdir(self.media_path)]
         for img in tqdm(image_files):
             self.faces.extend(self.process_image(img))
-            if self.CREATE_TEST_SET and len(self.faces) == 100:
+            if self.CREATE_TEST_SET and len(self.faces) >= 100:
                 with open("deepface_test_data.pickle", "wb") as file:
                     pickle.dump(self.faces, file)
                 return
