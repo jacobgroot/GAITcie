@@ -18,7 +18,7 @@ class Kmeans_cluster():
         " Prepares the data for the clustering by reducing demensions using umap"
         umap_model = umap.UMAP(n_components=100)
         print(np.array(self.faces[0].embedding).shape)
-        quit(0)
+        quit()
         # Ensure embeddings have consistent shape
         embeddings_list = [np.reshape(x.embedding, (x.embedding.shape[0], -1)) for x in self.faces]
         print(embeddings_list[0].shape)

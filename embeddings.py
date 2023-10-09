@@ -40,16 +40,16 @@ class Analyse():
     def process_image(img_path):
         " Returns Faces dataclass with all embeddings per image (n=number of persons in image)"
 
-        embeddings = [embedding for x in DeepFace.represent(img_path, enforce_detection=False) for embedding in x["embedding"]]
+        embeddings = [np.array(embedding) for x in DeepFace.represent(img_path, enforce_detection=False) for embedding in x["embedding"]]
 
-        return Faces(embeddings, img_path)
+        return [Faces(embedding, img_path) for embedding in embeddings]
 
     def analyse(self):
         " Calls process_image on all images in media folder and stores it in pickle file"
 
         image_files = [os.path.join(self.media_path, filename) for filename in os.listdir(self.media_path)]
         for img in tqdm(image_files):
-            self.faces.append(self.process_image(img))
+            self.faces.extend(self.process_image(img))
 
         # Save the results to a pickle file
         with open(self.pickle_file, "wb") as file:
