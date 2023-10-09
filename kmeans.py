@@ -17,10 +17,10 @@ class Kmeans_cluster():
     def preprocess(self):
         " Prepares the data for the clustering by reducing demensions using umap"
         umap_model = umap.UMAP(n_components=100)
-
+        print(np.array(self.faces[0].embedding).shape)
+        quit(0)
         # Ensure embeddings have consistent shape
-        embeddings_list = [np.array(x.embedding) for x in self.faces]
-        embeddings_list = [np.reshape(embedding, (embedding.shape[0], -1)) for embedding in embeddings_list]
+        embeddings_list = [np.reshape(x.embedding, (x.embedding.shape[0], -1)) for x in self.faces]
         print(embeddings_list[0].shape)
         # Now you can proceed with UMAP
         embeddings_umap = umap_model.fit_transform(embeddings_list)

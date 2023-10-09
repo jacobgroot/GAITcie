@@ -6,6 +6,7 @@ those embeddings will be safed to a file (name specified when called and include
 import os
 import multiprocessing
 import pickle
+import numpy as np
 from tqdm import tqdm
 from deepface import DeepFace
 from dataclasses import dataclass, field
@@ -39,7 +40,8 @@ class Analyse():
     def process_image(img_path):
         " Returns Faces dataclass with all embeddings per image (n=number of persons in image)"
 
-        embeddings = [x["embedding"] for x in DeepFace.represent(img_path, enforce_detection=False)]
+        embeddings = [embedding for x in DeepFace.represent(img_path, enforce_detection=False) for embedding in x["embedding"]]
+
         return Faces(embeddings, img_path)
 
     def analyse(self):
