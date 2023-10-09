@@ -35,6 +35,7 @@ class Analyse():
         if os.path.exists(pickle_file):
             os.remove(pickle_file)
 
+    @staticmethod
     def process_image(img_path):
         " Returns Faces dataclass with all embeddings per image (n=number of persons in image)"
 
