@@ -8,8 +8,8 @@ DOWNLOAD = False
 DEEPFACE = False
 CREATE_TEST_SET = False
 KMEANS = True
-PREPROCESS = True
-DIMENSIONS = 8
+PREPROCESS = False
+DIMENSIONS = 3
 PICKLE_FILE_NAME = "deepface_data.pickle"
 
 if DOWNLOAD:
