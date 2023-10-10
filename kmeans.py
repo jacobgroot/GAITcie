@@ -56,7 +56,7 @@ class Kmeans_cluster():
             self.faces = pickle.load(file)
         umap_embeddings = [face.umap_embedding for face in self.faces]
 
-        clusters = DBSCAN(eps=0.00005, min_samples=1, metric='cosine').fit(umap_embeddings)
+        clusters = DBSCAN(eps=0.5, min_samples=1, metric='euclidean').fit(umap_embeddings)
         print(clusters.labels_)
         output_folder = os.path.join(os.getcwd(), "labeled_pictures")
         self.organize_images_by_labels(output_folder, clusters.labels_)
@@ -65,19 +65,30 @@ class Kmeans_cluster():
     def organize_images_by_labels(self, output_folder, labels):
         """
         Creates for each label a seperate folder to store all images with that label
-        In the future, should also store what face was targeted
+        In the future, should also store what face was targeted.
+        !Warning! will remove all contents of labeled_pictures
         """
-        # Create folders and copy images based on cluster labels
+
+        # clear labeled_pictures
+        self.clear_folder(output_folder)
+            
+        # create folders and copy images based on cluster labels
         for i, face in enumerate(self.faces):
             label = labels[i]
             face.label = label
 
-            # Create a folder for the label if it doesn't exist
+            # store image in folder (create if does not exist)
             label_folder = os.path.join(output_folder, str(label))
             os.makedirs(label_folder, exist_ok=True)
-
-            # Copy the image to the corresponding label folder
             shutil.copy(face.image_path, label_folder)
+
+    @staticmethod
+    def clear_folder(folder):
+        if os.path.exists(folder):
+            for folder_name in os.listdir(folder):
+                folder_path = os.path.join(folder, folder_name)
+                if os.path.isdir(folder_path):
+                    shutil.rmtree(folder_path)
 
     def plot(self, inertia):
         start, stop = self.range
