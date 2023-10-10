@@ -8,8 +8,8 @@ DOWNLOAD = False
 DEEPFACE = False
 CREATE_TEST_SET = False
 KMEANS = True
-PREPROCESS = False
-DIMENSIONS = 3
+PREPROCESS = True
+DIMENSIONS = 100
 PICKLE_FILE_NAME = "deepface_data.pickle"
 
 if DOWNLOAD:
@@ -24,7 +24,7 @@ if KMEANS:
     cluster = Kmeans_cluster()
     if PREPROCESS:
         cluster.preprocess(DIMENSIONS)
-    cluster.elbow()
+    cluster.density_scan()
 
 class Proces(): ...
 "AI dingen"

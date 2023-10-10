@@ -46,10 +46,10 @@ class Kmeans_cluster():
 
 
 
-    def elbow(self):
+    def density_scan(self):
         """
-        No longer elbow method, change later
         DBSCAN not working that well, either more/less dimensions needed or smaller eps
+        Also possible that umap is not optimal. Maybe PCA to focus more on most expressive features
         """
         
         with open("deepface_umap_test.pickle", "rb") as file:
@@ -58,15 +58,28 @@ class Kmeans_cluster():
 
         clusters = DBSCAN(eps=0.00005, min_samples=1, metric='cosine').fit(umap_embeddings)
         print(clusters.labels_)
+        output_folder = os.path.join(os.getcwd(), "labeled_pictures")
+        self.organize_images_by_labels(output_folder, clusters.labels_)
 
-        # # safe in specific cases for testing
-        # output_folder = os.path.join(os.getcwd(), "labeled_pictures")
-        # for i, face in enumerate(self.faces):
-        #     face.label = clusters.labels_[i]
-        #     if i == 16 or i == 14 or i == 92 or i == 18 or i == 94 or i == 6 or i == 84: 
-        #         shutil.copy(face.image_path, output_folder)
 
-    def plot_elbow(self, inertia):
+    def organize_images_by_labels(self, output_folder, labels):
+        """
+        Creates for each label a seperate folder to store all images with that label
+        In the future, should also store what face was targeted
+        """
+        # Create folders and copy images based on cluster labels
+        for i, face in enumerate(self.faces):
+            label = labels[i]
+            face.label = label
+
+            # Create a folder for the label if it doesn't exist
+            label_folder = os.path.join(output_folder, str(label))
+            os.makedirs(label_folder, exist_ok=True)
+
+            # Copy the image to the corresponding label folder
+            shutil.copy(face.image_path, label_folder)
+
+    def plot(self, inertia):
         start, stop = self.range
         x_values = range(start, stop)
         plt.plot(x_values, inertia, marker='o')
