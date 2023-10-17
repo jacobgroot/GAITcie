@@ -36,10 +36,10 @@ class Face_creator():
         " Creates a list with all faces and saves each face as seperate image"
 
         faces = []
-
+        cutout_faces = []
         # get all faces for each image and put them all as a Face instance in a list 
         for i, filename in enumerate(os.listdir(self.media_path)):
-            if i == 15: # do not make it too large for testing
+            if i == 1:
                 break
             img_path = os.path.join(self.media_path, filename)
             
@@ -54,8 +54,16 @@ class Face_creator():
             image = cv2.imread(face.original_img)
             face_image = image[top:bottom, left:right]
             pil_image = Image.fromarray(face_image)
+            cutout_faces.append(Face(pil_image, face.original_img))
 
-            self.save_face(pil_image, j)
+            # self.save_face(pil_image, j)
+        
+        self.save_pickle(cutout_faces)
+
+    def save_pickle(self, cutout_faces):
+        with open("face_pickle", "wb") as file:
+            for face_instance in cutout_faces:
+                pickle.dump(face_instance, file)
             
 
     def detect_faces(self, image):
@@ -70,64 +78,3 @@ class Face_creator():
             print("good")
             output_path = os.path.join(self.output_folder, f'face_{index}.jpg')
             pil_image.save(output_path)
-
-            
-            
-    def write_pickle(self, dump_data):
-        with open("deepface_find_test_data", "wb") as file:
-            for _, data in dump_data:
-                # create test set
-                if _ == 100:
-                    return
-                
-                pickle.dump(data, file)
-
-    
-    
-
-
-# class Analyse():
-#     """ 
-#     Class analyses every image in the media/ folder with the DeepFace import.
-#     Creates a pickle file with all the embeddings and the corresponding image
-#     """
-
-#     # CHANGE THIS WHEN YOU RUN ON DIFFERENT PC TO NOT BLOW IT UP
-#     NUMBER_OF_CORES = 2
-
-#     def __init__(self, pickle_file, CREATE_TEST_SET):
-#         self.faces = []
-#         self.pickle_file = pickle_file
-#         self.media_path = os.path.join(os.getcwd(), 'media')
-#         self.CREATE_TEST_SET = CREATE_TEST_SET
-
-#         # Remove the previous pickle file
-#         if os.path.exists(pickle_file) and not self.CREATE_TEST_SET:
-#             os.remove(pickle_file)
-
-#         if os.path.exists("deepface_test_data.pickle") and self.CREATE_TEST_SET:
-#             os.remove("deepface_test_data.pickle")
-
-
-#     @staticmethod
-#     def process_image(img_path):
-#         " Returns Faces dataclass with all embeddings per image (n=number of persons in image)"
-
-#         embeddings = DeepFace.represent(img_path, enforce_detection=False)
-
-#         return [Faces(np.array(embedding["embedding"]), img_path) for embedding in embeddings]
-
-#     def analyse(self):
-#         " Calls process_image on all images in media folder and stores it in pickle file"
-
-#         image_files = [os.path.join(self.media_path, filename) for filename in os.listdir(self.media_path)]
-#         for img in tqdm(image_files):
-#             self.faces.extend(self.process_image(img))
-#             if self.CREATE_TEST_SET and len(self.faces) >= 100:
-#                 with open("deepface_test_data.pickle", "wb") as file:
-#                     pickle.dump(self.faces, file)
-#                 return
-
-#         # Save the results to a pickle file
-#         with open(self.pickle_file, "wb") as file:
-#             pickle.dump(self.faces, file)
