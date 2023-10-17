@@ -2,3 +2,5 @@ api.py
 deepface_data.pickle
 deepface_test_data.pickle
 media/
+labeled_pictures/
+seperate_faces/

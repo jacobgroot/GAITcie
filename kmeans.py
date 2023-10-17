@@ -6,7 +6,7 @@ matplotlib.use('Qt5Agg')  # Use the 'Agg' backend
 from mpl_toolkits.mplot3d import Axes3D  # Import 3D plotting functionality
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-
+from sklearn.metrics import silhouette_score
 import os
 from embeddings import Faces
 import shutil
@@ -34,7 +34,7 @@ class Kmeans_cluster():
 
         # generate new embeddings
         umap_embedding = umap_model.fit_transform(embedding_list)
-
+        return umap_embedding # temporary for testing
         # store embeddings
         for i, face in enumerate(self.faces):
             face.umap_embedding = umap_embedding[i]
@@ -44,9 +44,45 @@ class Kmeans_cluster():
         with open("deepface_umap_test.pickle", "wb") as file:
             pickle.dump(self.faces, file)
 
+    def find_optimal_parameters(self, min_n_dimensions, max_n_dimensions, eps_values, label):
+        ''' Tests different parameters on the dimensions of embedding and epsilon for dbscan'''
 
+        best_n_dimensions = 0
+        best_eps = 0
+        best_silhouette_score = -1
+        silhouette_scores = []
 
-    def density_scan(self):
+        # check all dimensions
+        for n_dimensions in range(min_n_dimensions, max_n_dimensions + 1):
+            print(n_dimensions)
+            # Perform UMAP preprocessing with the current n_dimensions
+            self.umap_embeddings = self.preprocess(n_dimensions)
+
+            for _, eps in enumerate(eps_values):
+                # Perform DBSCAN clustering with the current eps
+                labels = self.density_scan(eps)
+
+                # Evaluate the clustering using silhouette score
+                silhouette_score = self.evaluate_clustering(labels)
+                silhouette_scores.append(silhouette_score)
+                
+                
+                # Update the best parameters if the silhouette score is improved
+                if silhouette_score > best_silhouette_score:
+                    best_silhouette_score = silhouette_score
+                    best_n_dimensions = n_dimensions
+                    best_eps = eps
+
+        print(silhouette_scores)
+        if label:
+            self.umap_embeddings = self.preprocess(best_n_dimensions)
+            labels = self.density_scan(best_eps)
+            output_folder = os.path.join(os.getcwd(), "labeled_pictures")
+            self.organize_images_by_labels(output_folder, labels)
+            
+        return best_n_dimensions, best_eps, best_silhouette_score
+
+    def density_scan(self, eps):
         """
         DBSCAN not working that well, either more/less dimensions needed or smaller eps
         Also possible that umap is not optimal. Maybe PCA to focus more on most expressive features
@@ -56,11 +92,15 @@ class Kmeans_cluster():
             self.faces = pickle.load(file)
         umap_embeddings = [face.umap_embedding for face in self.faces]
 
-        clusters = DBSCAN(eps=0.5, min_samples=1, metric='euclidean').fit(umap_embeddings)
-        print(clusters.labels_)
-        output_folder = os.path.join(os.getcwd(), "labeled_pictures")
-        self.organize_images_by_labels(output_folder, clusters.labels_)
+        clusters = DBSCAN(eps=eps, min_samples=1, metric='cosine').fit(umap_embeddings)
+        return clusters.labels_
 
+    def evaluate_clustering(self, labels):
+        # Silhouette Score
+        try: 
+            return float(silhouette_score(self.umap_embeddings, labels, metric='cosine'))
+        except:
+            return -1
 
     def organize_images_by_labels(self, output_folder, labels):
         """
@@ -84,6 +124,7 @@ class Kmeans_cluster():
 
     @staticmethod
     def clear_folder(folder):
+        " can clear labeled_pictures folder. Can also clear any folder with child folder, so use with caution"
         if os.path.exists(folder):
             for folder_name in os.listdir(folder):
                 folder_path = os.path.join(folder, folder_name)
@@ -91,6 +132,7 @@ class Kmeans_cluster():
                     shutil.rmtree(folder_path)
 
     def plot(self, inertia):
+        ''' plotting method that is used to show cost with elbow method'''
         start, stop = self.range
         x_values = range(start, stop)
         plt.plot(x_values, inertia, marker='o')
