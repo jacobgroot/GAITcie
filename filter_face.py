@@ -26,6 +26,7 @@ class Face_creator():
         self.faces = []
         self.media_path = os.path.join(os.getcwd(), 'media') 
         self.output_folder = 'separate_faces'
+        self.pickle_output = 'face_pickle'
 
         self.face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -61,7 +62,7 @@ class Face_creator():
         self.save_pickle(cutout_faces)
 
     def save_pickle(self, cutout_faces):
-        with open("face_pickle", "wb") as file:
+        with open(self.pickle_output, "wb") as file:
             for face_instance in cutout_faces:
                 pickle.dump(face_instance, file)
             
